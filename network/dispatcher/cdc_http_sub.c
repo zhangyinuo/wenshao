@@ -7,6 +7,7 @@
 #include "mysqld_error.h"
 static MYSQL  mysql0;
 static MYSQL * mysql = &mysql0;
+#define max 0x100
 
 static int connect_db(t_db_info *db)
 {
@@ -58,5 +59,36 @@ static int init_db()
 
 	db.port = myconfig_get_intval("db_port", 3306);
 	return connect_db(&db); 
+}
+
+static void do_dispatcher()
+{
+	char sql[512] = {0x0};
+	snprintf(sql, sizeof(sql), "select root_domain from t_target" );
+
+	if (mysql_query(mysql, sql))
+	{
+		LOG(vfs_http_log, LOG_ERROR, "mysql_query error:%s:[%s]", mysql_error(mysql), sql);
+		return -1;
+	}
+
+
+	MYSQL_ROW row = NULL;
+	MYSQL_RES* result = mysql_store_result(mysql);
+	if (result)
+	{
+		while(NULL != (row = mysql_fetch_row(result)))
+		{
+			if (row[0])
+			{
+				add_trust_ip(str2ip(row[0]));
+			}
+		}
+		mysql_free_result(result);
+	}
+}
+
+static void do_reclaim()
+{
 }
 

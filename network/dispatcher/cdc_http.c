@@ -81,3 +81,20 @@ int svc_init()
 
 	return init_db(); 
 }
+
+int svc_send(int fd)
+{
+	return 0;
+}
+
+int svc_recv(int fd)
+{
+	return 0;
+}
+
+void svc_timeout()
+{
+	do_dispatcher();
+
+	do_reclaim();
+}
