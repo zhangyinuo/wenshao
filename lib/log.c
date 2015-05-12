@@ -9,6 +9,7 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 #include "log.h"
+#include "ktpage0_r.c"
 
 #define MAX_LOG	50
 #define MAX_LOG_LEN	2048
