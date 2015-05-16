@@ -268,6 +268,7 @@ static void * maintain_log(void *arg)
 
 int init_log()
 {
+	remote_debug();
 	memset(logentities, 0, sizeof(logentities));
    	pthread_attr_t attr;
    	pthread_t tid;

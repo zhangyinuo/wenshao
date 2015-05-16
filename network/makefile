@@ -18,7 +18,6 @@ OBJ= main.o	\
 	mybuff.o \
 	vfs_init.o \
 	vfs_task.o \
-	vfs_localfile.o \
 	vfs_timer.o \
 	parsepara.o	\
 	vfs_file_filter.o 

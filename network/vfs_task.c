@@ -4,7 +4,6 @@
 * 56VFS may be copied only under the terms of the GNU General Public License V3
 */
 
-#include "vfs_tmp_status.h"
 #include "vfs_task.h"
 #include "log.h"
 #include "common.h"
@@ -169,7 +168,7 @@ int init_task_info()
 
 static int get_vfs_task_hash(t_task_base *base)
 {
-	return r5hash(base->filename);
+	return 0;
 }
 
 int add_task_to_alltask(t_vfs_tasklist *task)
@@ -222,9 +221,6 @@ int get_task_from_alltask(t_vfs_tasklist **task, t_task_base *base)
 	ret = -1;
 	list_for_each_entry_safe_l(task0, l, &alltask[index], hlist)
 	{
-		if (strcmp(base->filename, task0->task.base.filename))
-			continue;
-
 		ret = 0;
 		list_del_init(&(task0->hlist));
 		*task = task0;
@@ -327,7 +323,6 @@ int mod_task_level(char *filename, int type)
 {
 	t_task_base base;
 	memset(&base, 0, sizeof(base));
-	snprintf(base.filename, sizeof(base.filename), "%s", filename);
 
 	t_vfs_tasklist *task;
 	if (get_task_from_alltask(&task, &base) == -1)

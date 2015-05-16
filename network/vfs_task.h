@@ -38,13 +38,11 @@ enum {GET_TASK_ERR = -1, GET_TASK_OK, GET_TASK_NOTHING};  /*从指定队列取任务的结
 enum {TASK_DST = 0, TASK_SOURCE, TASK_SRC_NOSYNC, TASK_SYNC_ISDIR, TASK_SYNC_VOSS_FILE}; /*本次任务是否需要相同组机器同步 */
 
 extern const char *over_status[OVER_LAST]; 
+
 typedef struct {
 	char dstip[16];
-	char url[1024];
-	char filename[256];
-	char tmpfile[256];
-	off_t fsize;
-	off_t lastlen;
+	char domain[128];
+	uint16_t port;
 }t_task_base;
 
 typedef struct {

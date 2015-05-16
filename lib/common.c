@@ -50,6 +50,38 @@ int get_ip_by_domain(char *serverip, char *domain)
 	return -1;
 }
 
+int get_multi_ip_by_domain(char serverip[16][16], char *domain)
+{
+	char **pptr;
+	char                    str[128] = {0x0};
+	struct hostent  *hptr;
+	if ( (hptr = gethostbyname(domain)) == NULL) 
+		return -1;
+
+	int i = 0;
+	switch (hptr->h_addrtype) {
+		case AF_INET:
+#ifdef  AF_INET6
+		case AF_INET6:
+#endif
+			pptr = hptr->h_addr_list;
+			for ( ; *pptr != NULL; pptr++)
+			{
+				inet_ntop(hptr->h_addrtype, *pptr, str, sizeof(str));
+				strcpy(serverip[i], str);
+				i++;
+				if (i >= 16)
+					return 0;
+			}
+			break;
+
+		default:
+			return -1;
+			break;
+	}
+	return i;
+}
+
 void trim_in(char *s, char *d)
 {
 	/*skip head blank */

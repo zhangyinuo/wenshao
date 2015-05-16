@@ -1,4 +1,4 @@
-SUBDIRS = lib 3rdlib network network/http_client network/http_server cdc network/dispatcher
+SUBDIRS = lib 3rdlib network network/client cdc network/dispatcher
 installdir = /home/vfs/
 #curday = $(shell date '+%Y%m%d')
 all:

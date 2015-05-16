@@ -54,6 +54,8 @@ int get_ip_by_domain(char *serverip, char *domain);
 
 void trim_in(char *s, char *d);
 
+int get_multi_ip_by_domain(char serverip[16][16], char *domain);
+
 uint32_t r5hash(const char *p); 
 
 int get_strtime(char *buf);

@@ -29,7 +29,6 @@
 #include "vfs_agent.h"
 #include "vfs_time_stamp.h"
 #include "vfs_file_filter.h"
-#include "vfs_tmp_status.h"
 #include "vfs_timer.h"
 
 int topper_queue = 1;
