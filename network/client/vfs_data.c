@@ -19,8 +19,6 @@
 #include "util.h"
 #include "acl.h"
 #include "vfs_task.h"
-#include "vfs_data_task.h"
-#include "vfs_localfile.h"
 
 static __thread int vfs_sig_log = -1;
 extern uint8_t self_stat ;
@@ -34,9 +32,7 @@ static __thread int g_queue = 1;
 int svc_initconn(int fd); 
 int active_send(int fd, char *data);
 
-#include "vfs_data_sub.c"
 #include "vfs_data_base.c"
-#include "vfs_data_task.c"
 
 static int init_proxy_info()
 {
@@ -82,7 +78,7 @@ int svc_init(int queue)
 	g_queue = queue;
 	LOG(vfs_sig_log, LOG_NORMAL, "queue = %d !\n", g_queue);
 
-	return init_stock();
+	return 0;
 }
 
 int svc_initconn(int fd) 
@@ -122,54 +118,7 @@ static int check_req(int fd)
 		LOG(vfs_sig_log, LOG_TRACE, "%s:%d fd[%d] no data!\n", FUNC, LN, fd);
 		return -1;  /*no suffic data, need to get data more */
 	}
-	char *end = strstr(data, "\r\n\r\n");
-	if (end == NULL)
-		return -1;
-	end += 4;
-
-	char *pret = strstr(data, "HTTP/");
-	if (pret == NULL)
-	{
-		LOG(vfs_sig_log, LOG_ERROR, "%s:%d fd[%d] ERROR no HTTP/!\n", FUNC, LN, fd);
-		return RECV_CLOSE;
-	}
-
-	pret = strchr(pret, ' ');
-	if (pret == NULL)
-	{
-		LOG(vfs_sig_log, LOG_ERROR, "%s:%d fd[%d] ERROR no http blank!\n", FUNC, LN, fd);
-		return RECV_CLOSE;
-	}
-
-	int retcode = atoi(pret + 1);
-	if (retcode != 200 && retcode != 206)
-	{
-		LOG(vfs_sig_log, LOG_ERROR, "%s:%d fd[%d] ERROR retcode = %d!\n", FUNC, LN, fd, retcode);
-		return RECV_CLOSE;
-	}
-
-	off_t fsize = 1024000;
-	int clen = end - data;
-	char *pleng = strstr(data, "Content-Length: ");
-	if (pleng == NULL)
-		LOG(vfs_sig_log, LOG_ERROR, "%s:%d fd[%d] ERROR Content-Length: !\n", FUNC, LN, fd);
-	else
-	{
-		fsize = atol(pleng + 16);
-		LOG(vfs_sig_log, LOG_DEBUG, "%s:%d fd[%d] Content-Length: %ld!\n", FUNC, LN, fd, fsize);
-		if (fsize > 1024000)
-		{
-			LOG(vfs_sig_log, LOG_ERROR, "%s:%d fd[%d] Content-Length: %ld too long!\n", FUNC, LN, fd, fsize);
-			return RECV_CLOSE;
-		}
-	}
-	struct conn *curcon = &acon[fd];
-	vfs_cs_peer *peer = (vfs_cs_peer *) curcon->user;
-	peer->sock_stat = RECV_HEAD_END;
-	/*
-	 * write all rsp to file include http header and http body
-	 */
-	return do_prepare_recvfile(fd, fsize + clen);
+	return 0;
 }
 
 int svc_recv(int fd) 
@@ -180,33 +129,6 @@ recvfileing:
 	peer->hbtime = time(NULL);
 	list_move_tail(&(peer->alist), &activelist);
 	LOG(vfs_sig_log, LOG_TRACE, "fd[%d] sock stat %d!\n", fd, peer->sock_stat);
-	if (peer->sock_stat == RECV_BODY_ING)
-	{
-		char *data;
-		size_t datalen;
-		if (get_client_data(fd, &data, &datalen))
-			return RECV_ADD_EPOLLIN;
-		t_task_base *base = &(peer->base);
-		int remainlen = base->fsize - base->lastlen;
-		datalen = datalen <= remainlen ? datalen : remainlen ; 
-		int n = write(peer->local_in_fd, data, datalen);
-		if (n < 0)
-		{
-			LOG(vfs_sig_log, LOG_ERROR, "fd[%d] write error %m close it!\n", fd);
-			return RECV_CLOSE;  /* ERROR , close it */
-		}
-		consume_client_data(fd, n);
-		base->lastlen += n;
-		if (base->lastlen >= base->fsize)
-		{
-			close_tmp_check_mv(base, peer->local_in_fd);
-			LOG(vfs_sig_log, LOG_NORMAL, "fd[%d] recv ok %s\n", fd, base->filename);
-			peer->local_in_fd = -1;
-			return RECV_CLOSE;
-		}
-		return RECV_ADD_EPOLLIN;
-	}
-	
 	int ret = RECV_ADD_EPOLLIN;;
 	int subret = 0;
 	while (1)
@@ -266,9 +188,5 @@ void svc_finiconn(int fd)
 	list_del_init(&(peer->alist));
 	if (peer->local_in_fd <= 0)
 		return;
-
-	t_task_base *base = &(peer->base);
-	close_tmp_check_mv(base, peer->local_in_fd);
-	LOG(vfs_sig_log, LOG_NORMAL, "fd[%d] recv error %s\n", fd, base->filename);
 	peer->local_in_fd = -1;
 }

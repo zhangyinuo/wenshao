@@ -23,6 +23,7 @@
 #define DOMAIN_PREFIX "fcs"
 
 #define TASK_HOME 0
+#define TASK_WAIT 1
 #define MAX_TASK_QUEUE 65
 
 enum {TASK_MOD_UP = 0, TASK_MOD_DOWN, TASK_MOD_CANCEL};
@@ -42,7 +43,6 @@ extern const char *over_status[OVER_LAST];
 typedef struct {
 	char dstip[16];
 	char domain[128];
-	uint16_t port;
 }t_task_base;
 
 typedef struct {

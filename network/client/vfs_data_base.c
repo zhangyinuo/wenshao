@@ -11,7 +11,6 @@
  *CS FCS ip信息采用uint32_t 存储，便于存储和查找
  */
 volatile extern int maintain ;		//1-维护配置 0 -可以使用
-extern t_vfs_up_proxy g_proxy;
 
 static int active_connect(char *ip, int port)
 {
@@ -70,9 +69,7 @@ static void check_task()
 
 		vfs_set_task(task, TASK_HOME);
 		char httpheader[1024] = {0x0};
-		create_header(base->url, t + 1, httpheader);
 		active_send(fd, httpheader);
-		*t = '/';
 
 		struct conn *curcon = &acon[fd];
 		vfs_cs_peer *peer = (vfs_cs_peer *) curcon->user;

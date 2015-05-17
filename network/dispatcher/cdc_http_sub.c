@@ -4,6 +4,7 @@
 * 56VFS may be copied only under the terms of the GNU General Public License V3
 */
 #include "mysql.h"
+#include "vfs_task.h"
 #include "mysqld_error.h"
 static MYSQL  mysql0;
 static MYSQL * mysql = &mysql0;
@@ -21,6 +22,7 @@ static int g_target_count;
 static int g_sub_count;
 
 static uint16_t g_port[MAX_PORT];
+static int g_port_count;
 
 /* for http port scan url */
 
@@ -81,6 +83,32 @@ static int init_db()
 	return connect_db(&db); 
 }
 
+static void create_task(char *domain, char ip[16][16])
+{
+	int i = 0;
+	for ( ; i < 16; i++)
+	{
+		if (strlen(ip[i]) < 4)
+			return;
+
+		char *t = strrchr(ip[i], '.');
+		if (t == NULL)
+			continue;
+
+		t_vfs_tasklist *task = NULL;
+		if (vfs_get_task(&task, TASK_HOME) != GET_TASK_OK)
+			continue;
+
+		*t = 0x0;
+		t_task_base *base = &(task->task.base);
+
+		snprintf(base->dstip, sizeof(base->dstip), "%s", ip[i]);
+		snprintf(base->domain, sizeof(base->domain), "%s", domain);
+
+		vfs_set_task(task, TASK_WAIT);
+	}
+}
+
 static void get_ip_range()
 {
 	int i_target = 0;
@@ -89,6 +117,7 @@ static void get_ip_range()
 	for (; i_target < g_target_count; i_target++)
 	{
 		i_domain = 0;
+
 		for (; i_domain < g_sub_count; i_domain++)
 		{
 			char realname[256] = {0x0};
@@ -99,8 +128,7 @@ static void get_ip_range()
 			int i = get_multi_ip_by_domain(ip, realname);
 
 			if (i > 0)
-			{
-			}
+				create_task(realname, ip);
 		}
 	}
 }
