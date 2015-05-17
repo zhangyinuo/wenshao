@@ -60,15 +60,6 @@ static void check_task()
 		once++;
 
 		t_task_base *base = (t_task_base *) (&(task->task.base));
-		char *t = strchr(base->url, '/');
-		if (t == NULL)
-		{
-			LOG(vfs_sig_log, LOG_ERROR, "error url format %s\n", base->url);
-			vfs_set_task(task, TASK_HOME);
-			continue;
-		}
-
-		*t = 0x0;
 		int fd = active_connect(base->dstip, 80);
 		if (fd < 0)
 		{

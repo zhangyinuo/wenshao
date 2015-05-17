@@ -29,10 +29,9 @@ extern const char *sock_stat_cmd[] ;
 typedef http_peer vfs_cs_peer; 
 
 typedef struct {
-	char username[64];
-	char password[64];
-	char host[32];
-	int port;
-} t_vfs_up_proxy;
+	char dstip[16];
+	char domain[128];
+	uint16_t port;
+} t_peer_info;
 
 #endif
