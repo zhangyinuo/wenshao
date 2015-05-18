@@ -1,5 +1,5 @@
 SUBDIRS = lib 3rdlib network network/client network/dispatcher
-installdir = /home/vfs/
+installdir = /ott/dev/install
 #curday = $(shell date '+%Y%m%d')
 all:
 	@list='$(SUBDIRS)'; for subdir in $$list; do \
