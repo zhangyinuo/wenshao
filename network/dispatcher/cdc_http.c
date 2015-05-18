@@ -18,9 +18,7 @@
 #include "myepoll.h"
 #include "protocol.h"
 #include "util.h"
-#include "bitops.h"
 #include "acl.h"
-#include "cdc_hash.h"
 #include "cdc_http.h"
 int vfs_http_log = -1;
 

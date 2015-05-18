@@ -32,7 +32,6 @@ typedef struct {
 	int  port;
 	int fd;
 	uint32_t hbtime;
-	uint32_t ip;
 	uint32_t sock_stat;
 	list_head_t alist;
 } t_peer_info;

@@ -111,12 +111,13 @@ static int create_header(char *domain, char *url, char *httpheader)
 	return l;
 }
 
-static void do_scan(int fd, char *domain, int port)
+static void do_scan(int fd, char *domain, int port, char *ip)
 {
 	struct conn *curcon = &acon[fd];
 	vfs_cs_peer *peer = (vfs_cs_peer *) curcon->user;
 
 	snprintf(peer->domain, sizeof(peer->domain), "%s", domain);
+	snprintf(peer->dstip, sizeof(peer->dstip), "%s", ip);
 	peer->port = port;
 
 	char sendbuff[4096] = {0x0};
@@ -141,7 +142,7 @@ static void gen_scan_task(char *ip, char *domain)
 		{
 			int fd = active_connect(dstip, g_port[j]);
 			if (fd > 0)
-				do_scan(fd, domain, g_port[j]);
+				do_scan(fd, domain, g_port[j], dstip);
 		}
 	}
 }
@@ -237,6 +238,24 @@ static int reload_port_url()
 	return 0;
 }
 
+static void remove_space(char *src, char *dst, char *space, int len)
+{
+	while(*src)
+	{
+		if (*src == '\n' || *src == '\r')
+		{
+			memcpy(dst, space, len);
+			dst += len;
+		}
+		else
+		{
+			*dst = *src;
+			dst++;
+		}
+		src++;
+	}
+}
+
 static void dump_return_msg(int fd, char *data, size_t len)
 {
 	static FILE *fp = NULL;
@@ -276,5 +295,12 @@ static void dump_return_msg(int fd, char *data, size_t len)
 			return;
 		}
 	}
-}
 
+	struct conn *curcon = &acon[fd];
+	vfs_cs_peer *peer = (vfs_cs_peer *) curcon->user;
+
+	char dst[409600] = {0x0};
+	remove_space(data, dst, "&&", 2);
+
+	fprintf(fp, "%s %s %d [%s]\n", peer->domain, peer->dstip, peer->port, dst);
+}
