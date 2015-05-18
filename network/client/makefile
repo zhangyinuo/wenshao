@@ -1,7 +1,8 @@
 CC=gcc
 CXX=g++
-INC+= -I../ -I../../lib  -I../../3rdlib
+INC+= -I../ -I../../lib  -I../../3rdlib -I/usr/include/mysql
 LIB+=-lpthread  -L../../lib -lvfs   -L../../3rdlib -lnmshm -lstdc++
+LIB+= -L/usr/lib64/mysql/ -lmysqlclient
 CFLAGS+= -g -O2 -pipe -Wall -fno-strict-aliasing -D_GNU_SOURCE -D_REENTRANT -D_FILE_OFFSET_BITS=64 -fPIC -shared #-z defs
 TARGET=http_client.so
 ALL:$(TARGET)

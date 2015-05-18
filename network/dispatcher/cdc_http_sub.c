@@ -13,23 +13,11 @@ static MYSQL * mysql = &mysql0;
 #define MAX_LEN_TARGET 0x40
 #define MAX_LEN_SUB 0x10
 
-#define MAX_PORT 0x100
-
 static char g_target[MAX_TARGET][MAX_LEN_TARGET];
 static char g_sub_domain[MAX_SUB][MAX_LEN_SUB];
 
 static int g_target_count;
 static int g_sub_count;
-
-static uint16_t g_port[MAX_PORT];
-static int g_port_count;
-
-/* for http port scan url */
-
-#define MAX_URL 0x1000
-#define MAX_LEN_URL 0x100
-static char g_url[MAX_URL][MAX_LEN_URL];
-static int g_url_count;
 
 static int connect_db(t_db_info *db)
 {
@@ -182,48 +170,6 @@ static void do_dispatcher()
 			if (row[0])
 			{
 				strcpy(g_sub_domain[g_sub_count++], row[0]);
-			}
-		}
-		mysql_free_result(result);
-	}
-
-	memset(sql, 0, sizeof(sql));
-	snprintf(sql, sizeof(sql), "select url from t_url" );
-
-	if (mysql_query(mysql, sql))
-	{
-		LOG(vfs_http_log, LOG_ERROR, "mysql_query error:%s:[%s]", mysql_error(mysql), sql);
-		return;
-	}
-
-	memset(g_url, 0, sizeof(g_url));
-	g_url_count = 0;
-
-	row = NULL;
-	result = mysql_store_result(mysql);
-	if (result)
-
-	memset(sql, 0, sizeof(sql));
-	snprintf(sql, sizeof(sql), "select url from t_url" );
-
-	if (mysql_query(mysql, sql))
-	{
-		LOG(vfs_http_log, LOG_ERROR, "mysql_query error:%s:[%s]", mysql_error(mysql), sql);
-		return;
-	}
-
-	memset(g_port, 0, sizeof(g_port));
-	g_port_count = 0;
-
-	row = NULL;
-	result = mysql_store_result(mysql);
-	if (result)
-	{
-		while(NULL != (row = mysql_fetch_row(result)))
-		{
-			if (row[0])
-			{
-				g_port[g_port_count++] = atoi(row[0]);
 			}
 		}
 		mysql_free_result(result);

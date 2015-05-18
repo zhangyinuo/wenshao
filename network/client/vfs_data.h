@@ -26,12 +26,17 @@ enum SOCK_STAT {LOGOUT = 0, CONNECTED, RECV_HEAD_ING, RECV_HEAD_END, RECV_BODY_I
 
 extern const char *sock_stat_cmd[] ;
 
-typedef http_peer vfs_cs_peer; 
-
 typedef struct {
 	char dstip[16];
 	char domain[128];
-	uint16_t port;
+	int  port;
+	int fd;
+	uint32_t hbtime;
+	uint32_t ip;
+	uint32_t sock_stat;
+	list_head_t alist;
 } t_peer_info;
+
+typedef t_peer_info vfs_cs_peer; 
 
 #endif

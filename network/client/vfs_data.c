@@ -78,7 +78,7 @@ int svc_init(int queue)
 	g_queue = queue;
 	LOG(vfs_sig_log, LOG_NORMAL, "queue = %d !\n", g_queue);
 
-	return 0;
+	return init_db() || reload_port_url();
 }
 
 int svc_initconn(int fd) 
@@ -107,7 +107,6 @@ int svc_initconn(int fd)
 	return 0;
 }
 
-/*校验是否有一个完整请求*/
 static int check_req(int fd)
 {
 	LOG(vfs_sig_log, LOG_DEBUG, "%s:%s:%d\n", ID, FUNC, LN);
@@ -118,6 +117,10 @@ static int check_req(int fd)
 		LOG(vfs_sig_log, LOG_TRACE, "%s:%d fd[%d] no data!\n", FUNC, LN, fd);
 		return -1;  /*no suffic data, need to get data more */
 	}
+	if (datalen > 1024000)
+		return 0;
+
+	dump_return_msg(fd, data, datalen);
 	return 0;
 }
 
@@ -125,23 +128,12 @@ int svc_recv(int fd)
 {
 	struct conn *curcon = &acon[fd];
 	vfs_cs_peer *peer = (vfs_cs_peer *) curcon->user;
-recvfileing:
 	peer->hbtime = time(NULL);
 	list_move_tail(&(peer->alist), &activelist);
 	LOG(vfs_sig_log, LOG_TRACE, "fd[%d] sock stat %d!\n", fd, peer->sock_stat);
-	int ret = RECV_ADD_EPOLLIN;;
-	int subret = 0;
-	while (1)
-	{
-		subret = check_req(fd);
-		if (subret == -1)
-			break;
-		if (subret == RECV_CLOSE)
-			return RECV_CLOSE;
-		if (peer->sock_stat == RECV_BODY_ING)
-			goto recvfileing;
-	}
-	return ret;
+	if (check_req(fd))
+		return RECV_ADD_EPOLLIN;
+	return RECV_CLOSE;
 }
 
 int svc_send_once(int fd)
@@ -186,7 +178,4 @@ void svc_finiconn(int fd)
 		return;
 	vfs_cs_peer *peer = (vfs_cs_peer *) curcon->user;
 	list_del_init(&(peer->alist));
-	if (peer->local_in_fd <= 0)
-		return;
-	peer->local_in_fd = -1;
 }
