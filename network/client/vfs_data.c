@@ -25,8 +25,7 @@
 #define MAX_URL 0x1000
 #define MAX_LEN_URL 0x100
 
-static MYSQL  mysql0;
-static __thread MYSQL * mysql = &mysql0;
+static __thread MYSQL * mysql;
 
 static __thread int g_port[MAX_PORT];
 static __thread int g_port_count;

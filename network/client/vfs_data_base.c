@@ -15,7 +15,12 @@
 
 static int connect_db(t_db_info *db)
 {
-    mysql_init(mysql);
+    mysql = mysql_init(0);
+	if (mysql == NULL)
+	{
+		LOG(vfs_sig_log, LOG_ERROR, "mysql_init error %m\n");
+		return -1;
+	}
 	mysql_options(mysql, MYSQL_SET_CHARSET_NAME, "gbk");
     if (NULL == mysql_real_connect(mysql, db->host, db->username, db->passwd, db->db, db->port, NULL, 0))
 	{
