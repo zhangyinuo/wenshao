@@ -13,6 +13,8 @@ static MYSQL * mysql = &mysql0;
 #define MAX_LEN_TARGET 0x40
 #define MAX_LEN_SUB 0x10
 
+static int g_queue_index = 1;
+
 static char g_target[MAX_TARGET][MAX_LEN_TARGET];
 static char g_sub_domain[MAX_SUB][MAX_LEN_SUB];
 
@@ -93,7 +95,10 @@ static void create_task(char *domain, char ip[16][16])
 		snprintf(base->dstip, sizeof(base->dstip), "%s", ip[i]);
 		snprintf(base->domain, sizeof(base->domain), "%s", domain);
 
-		vfs_set_task(task, TASK_WAIT);
+		vfs_set_task(task, g_queue_index);
+		g_queue_index++;
+		if (g_queue_index > 8)
+			g_queue_index = 1;
 	}
 }
 

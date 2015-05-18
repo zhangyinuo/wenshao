@@ -31,7 +31,6 @@
 #include "vfs_file_filter.h"
 #include "vfs_timer.h"
 
-int topper_queue = 1;
 int botter_queue = 1;
 extern t_g_config g_config;
 t_ip_info self_ipinfo;
@@ -129,12 +128,11 @@ int main(int argc, char **argv) {
 	memset(args, 0, sizeof(args));
 	int i = 1;
 	t_thread_arg *arg = NULL;
-	topper_queue = 8;
 	for( ; i <= 8; i++)
 	{
 		arg = &(args[i]);
 		arg->queue = i;
-		snprintf(arg->name, sizeof(arg->name), "./http_client.so");
+		snprintf(arg->name, sizeof(arg->name), "./client.so");
 		LOG(glogfd, LOG_NORMAL, "prepare start %s\n", arg->name);
 		arg->maxevent = myconfig_get_intval("vfs_data_maxevent", 4096);
 		if (init_vfs_thread(arg))
@@ -142,7 +140,7 @@ int main(int argc, char **argv) {
 	}
 
 	arg = &(args[i]);
-	snprintf(arg->name, sizeof(arg->name), "./http_server.so");
+	snprintf(arg->name, sizeof(arg->name), "./dispatcher.so");
 	LOG(glogfd, LOG_NORMAL, "prepare start %s\n", arg->name);
 	arg->port = g_config.sig_port;
 	arg->maxevent = myconfig_get_intval("vfs_data_maxevent", 4096);

@@ -26,13 +26,10 @@ install:
 	mkdir $(installdir)/path/indir -p;
 	mkdir $(installdir)/path/bkdir -p;
 	mkdir $(installdir)/path/delfile -p;
-	cd network; cp vfs_master $(installdir)/bin; cp vfs_master.conf $(installdir)/conf;
-	cd network/tracker ; cp *.so $(installdir)/bin
-	cd network/cs; cp *.so $(installdir)/bin
-	cd network/data; cp *.so $(installdir)/bin
+	cd network; cp wenshao $(installdir)/bin; cp wenshao.conf $(installdir)/conf;
+	cd network/client; cp *.so $(installdir)/bin
+	cd network/dispatcher; cp *.so $(installdir)/bin
 	cp script/*.sh $(installdir)/bin
-	cd network/fcs; cp *.so $(installdir)/bin
-	cd network/voss; cp *.so $(installdir)/bin
 
 install_cdc_m:
 	rm -rf $(installdir)/*;
