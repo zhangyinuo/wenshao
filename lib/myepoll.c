@@ -81,6 +81,8 @@ int createsocket(char *ip, int port)
 	{
 		return -1;
 	}
+	int nb = 0;
+	ioctl(sockfd, FIONBIO, &nb);
 	setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, &timeo, len);
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;

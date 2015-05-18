@@ -128,6 +128,12 @@ static void get_ip_range()
 
 static void do_dispatcher()
 {
+	static time_t last = 0;
+	time_t cur = time(NULL);
+
+	if (cur - last < 3600)
+		return;
+	last = cur;
 	char sql[512] = {0x0};
 	snprintf(sql, sizeof(sql), "select target from t_target" );
 
