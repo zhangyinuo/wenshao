@@ -1,4 +1,4 @@
-NS=worker
+NS=wenshao
 CC=gcc
 CXX=g++
 INC+= 
