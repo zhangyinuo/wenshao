@@ -10,26 +10,6 @@
  *CS和FCS数目较多，放在hash链表
  *CS FCS ip信息采用uint32_t 存储，便于存储和查找
  */
-#include "mysql.h"
-#include "vfs_task.h"
-#include "mysqld_error.h"
-static MYSQL  mysql0;
-static MYSQL * mysql = &mysql0;
-
-volatile extern int maintain ;		//1-维护配置 0 -可以使用
-
-#define MAX_PORT 0x100
-
-static int g_port[MAX_PORT];
-static int g_port_count;
-
-/* for http port scan url */
-
-#define MAX_URL 0x1000
-#define MAX_LEN_URL 0x100
-static char g_url[MAX_URL][MAX_LEN_URL];
-static int g_url_count;
-
 #define outdir "../path/outdir"
 #define tmpdir "../path/tmpdir"
 

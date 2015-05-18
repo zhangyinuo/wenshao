@@ -19,15 +19,26 @@
 #include "util.h"
 #include "acl.h"
 #include "vfs_task.h"
+#include "mysql.h"
+#include "mysqld_error.h"
+#define MAX_PORT 0x100
+#define MAX_URL 0x1000
+#define MAX_LEN_URL 0x100
+
+static MYSQL  mysql0;
+static __thread MYSQL * mysql = &mysql0;
+
+static __thread int g_port[MAX_PORT];
+static __thread int g_port_count;
+
+static __thread char g_url[MAX_URL][MAX_LEN_URL];
+static __thread int g_url_count;
 
 static __thread int vfs_sig_log = -1;
-extern uint8_t self_stat ;
-extern t_ip_info self_ipinfo;
 /* online list */
 static __thread list_head_t activelist;  //用来检测超时
 static __thread list_head_t online_list[256]; //用来快速定位查找
 
-int g_proxyed = 0;
 static __thread int g_queue = 1;
 int svc_initconn(int fd); 
 int active_send(int fd, char *data);
@@ -70,10 +81,6 @@ int svc_init(int queue)
 		LOG(vfs_sig_log, LOG_ERROR, "init_proxy_info err!\n");
 		return -1;
 	}
-	if (g_proxyed)
-		LOG(vfs_sig_log, LOG_NORMAL, "proxy mode!\n");
-	else
-		LOG(vfs_sig_log, LOG_NORMAL, "not proxy mode!\n");
 	
 	g_queue = queue;
 	LOG(vfs_sig_log, LOG_NORMAL, "queue = %d !\n", g_queue);
