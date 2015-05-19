@@ -6,6 +6,13 @@
 #include "mysql.h"
 #include "vfs_task.h"
 #include "mysqld_error.h"
+
+#if __GNUC__ < 4
+static inline void barrier(void) { __asm__ volatile("":::"memory"); }
+#else
+static inline void barrier(void) { __sync_synchronize (); }
+#endif
+
 static MYSQL  mysql0;
 static MYSQL * mysql = &mysql0;
 #define MAX_TARGET 0x100
@@ -76,6 +83,7 @@ static int init_db()
 static void create_task(char *domain, char ip[16][16])
 {
 	int i = 0;
+	LOG(vfs_http_log, LOG_NORMAL, "%s %s %d\n", __FILE__, __func__, __LINE__);
 	for ( ; i < 16; i++)
 	{
 		if (strlen(ip[i]) < 4)
@@ -95,7 +103,9 @@ static void create_task(char *domain, char ip[16][16])
 		snprintf(base->dstip, sizeof(base->dstip), "%s", ip[i]);
 		snprintf(base->domain, sizeof(base->domain), "%s", domain);
 
+		barrier();
 		vfs_set_task(task, g_queue_index);
+		LOG(vfs_http_log, LOG_NORMAL, "push task %s %s %d\n", base->domain, base->dstip, g_queue_index);
 		g_queue_index++;
 		if (g_queue_index > 8)
 			g_queue_index = 1;
@@ -107,6 +117,7 @@ static void get_ip_range()
 	int i_target = 0;
 	int i_domain = 0;
 
+	LOG(vfs_http_log, LOG_NORMAL, "%s %s %d\n", __FILE__, __func__, __LINE__);
 	for (; i_target < g_target_count; i_target++)
 	{
 		i_domain = 0;
@@ -133,6 +144,8 @@ static void do_dispatcher()
 
 	if (cur - last < 3600)
 		return;
+
+	LOG(vfs_http_log, LOG_NORMAL, "do_dispatcher\n");
 	last = cur;
 	char sql[512] = {0x0};
 	snprintf(sql, sizeof(sql), "select target from t_target" );

@@ -74,15 +74,13 @@ int createsocket(char *ip, int port)
 	int					sockfd;
 	struct sockaddr_in	servaddr;
 
-	struct timeval timeo = {2, 0};
+	struct timeval timeo = {0, 500000};
 	socklen_t len = sizeof(timeo);
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0)
 	{
 		return -1;
 	}
-	int nb = 0;
-	ioctl(sockfd, FIONBIO, &nb);
 	setsockopt(sockfd, SOL_SOCKET, SO_SNDTIMEO, &timeo, len);
 	memset(&servaddr, 0, sizeof(servaddr));
 	servaddr.sin_family = AF_INET;
