@@ -10,6 +10,8 @@
  *CS和FCS数目较多，放在hash链表
  *CS FCS ip信息采用uint32_t 存储，便于存储和查找
  */
+
+static int g_get_info_queue_index = 9;
 #define outdir "../path/outdir"
 #define tmpdir "../path/tmpdir"
 
@@ -136,46 +138,33 @@ static int active_connect(char *ip, int port)
 		LOG(vfs_sig_log, LOG_ERROR, "connect %s:%d err %m\n", ip, port);
 		return -1;
 	}
-	if (svc_initconn(fd))
-	{
-		LOG(vfs_sig_log, LOG_ERROR, "svc_initconn err %m\n");
-		close(fd);
-		return -1;
-	}
-	add_fd_2_efd(fd);
-	LOG(vfs_sig_log, LOG_NORMAL, "fd [%d] connect %s:%d\n", fd, ip, port);
-	return fd;
+	close (fd);
+	return 0;
 }
 
-static int create_header(char *domain, char *url, char *httpheader)
+static void do_scan(char *domain, int port, char *ip)
 {
-	int l = sprintf(httpheader, "GET /%s HTTP/1.1\r\n", url);
-	l += sprintf(httpheader + l, "Host: %s\r\nUser-Agent: HTTPCLIENT\r\nConnection: Close\r\n\r\n", domain);
-	return l;
-}
+	t_vfs_tasklist *task = NULL;
+	if (vfs_get_task(&task, TASK_HOME) != GET_TASK_OK)
+		return ;
 
-static void do_scan(int fd, char *domain, int port, char *ip)
-{
-	struct conn *curcon = &acon[fd];
-	vfs_cs_peer *peer = (vfs_cs_peer *) curcon->user;
+	t_task_base *base = &(task->task.base);
 
-	snprintf(peer->domain, sizeof(peer->domain), "%s", domain);
-	snprintf(peer->dstip, sizeof(peer->dstip), "%s", ip);
-	peer->port = port;
+	snprintf(base->dstip, sizeof(base->dstip), "%s", ip);
+	snprintf(base->domain, sizeof(base->domain), "%s", domain);
+	base->port = port;
 
-	char sendbuff[4096] = {0x0};
+	vfs_set_task(task, g_get_info_queue_index);
+	g_get_info_queue_index++;
 
-	int l = create_header(domain, "test", sendbuff);
-	LOG(vfs_sig_log, LOG_DEBUG, "send %d cmdid %s\n", fd, sendbuff);
-	set_client_data(fd, sendbuff, l);
-	modify_fd_event(fd, EPOLLOUT);
+	if (g_get_info_queue_index > 16)
+		g_get_info_queue_index = 9;
 }
 
 static void gen_scan_task(char *ip, char *domain)
 {
 	int i = 1;
 
-	LOG(vfs_sig_log, LOG_NORMAL, "%s %s %d %d\n", __FILE__, __func__, __LINE__, g_port_count);
 	for (; i < 255; i++)
 	{
 		char dstip[16] = {0x0};
@@ -184,10 +173,9 @@ static void gen_scan_task(char *ip, char *domain)
 		int j = 0;
 		for ( ; j < g_port_count; j++)
 		{
-	LOG(vfs_sig_log, LOG_NORMAL, "%s %s %d\n", __FILE__, __func__, __LINE__);
 			int fd = active_connect(dstip, g_port[j]);
-			if (fd > 0)
-				do_scan(fd, domain, g_port[j], dstip);
+			if (fd == 0)
+				do_scan(domain, g_port[j], dstip);
 		}
 	}
 }
@@ -217,71 +205,4 @@ static void check_task()
 		gen_scan_task(base->dstip, base->domain);
 		vfs_set_task(task, TASK_HOME);
 	}
-}
-
-static void remove_space(char *src, char *dst, char *space, int len)
-{
-	while(*src)
-	{
-		if (*src == '\n' || *src == '\r')
-		{
-			memcpy(dst, space, len);
-			dst += len;
-		}
-		else
-		{
-			*dst = *src;
-			dst++;
-		}
-		src++;
-	}
-}
-
-static void dump_return_msg(int fd, char *data, size_t len)
-{
-	static FILE *fp = NULL;
-	static time_t last = 0;
-	if (last == 0)
-		last = time(NULL);
-
-	static char tmpfile[256] = {0x0};
-
-	time_t now = time(NULL);
-	if (now - last > 60)
-	{
-		last = now;
-		if (fp)
-		{
-			fclose(fp);
-			fp = NULL;
-
-			char outfile[256] = {0x0};
-			snprintf(outfile, sizeof(outfile), "%s/%s", outdir, basename(tmpfile));
-			if (rename(tmpfile, outfile))
-				LOG(vfs_sig_log, LOG_ERROR, "rename %s to %s error %m\n", tmpfile, outfile);
-			else
-				LOG(vfs_sig_log, LOG_NORMAL, "rename %s to %s OK\n", tmpfile, outfile);
-		}
-	}
-	if (fp == NULL)
-	{
-		char buft[16] = {0x0};
-		memset(tmpfile, 0, sizeof(tmpfile));
-		get_strtime(buft);
-		snprintf(tmpfile, sizeof(tmpfile), "%s/first_%s", tmpdir, buft);
-		fp = fopen(tmpfile, "w");
-		if (fp == NULL)
-		{
-			LOG(vfs_sig_log, LOG_ERROR, "open %s error %m\n", tmpfile);
-			return;
-		}
-	}
-
-	struct conn *curcon = &acon[fd];
-	vfs_cs_peer *peer = (vfs_cs_peer *) curcon->user;
-
-	char dst[409600] = {0x0};
-	remove_space(data, dst, "&&", 2);
-
-	fprintf(fp, "%s %s %d [%s]\n", peer->domain, peer->dstip, peer->port, dst);
 }

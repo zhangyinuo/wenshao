@@ -115,18 +115,6 @@ int svc_initconn(int fd)
 
 static int check_req(int fd)
 {
-	LOG(vfs_sig_log, LOG_DEBUG, "%s:%s:%d\n", ID, FUNC, LN);
-	char *data;
-	size_t datalen;
-	if (get_client_data(fd, &data, &datalen))
-	{
-		LOG(vfs_sig_log, LOG_TRACE, "%s:%d fd[%d] no data!\n", FUNC, LN, fd);
-		return -1;  /*no suffic data, need to get data more */
-	}
-	if (datalen > 1024000)
-		return 0;
-
-	dump_return_msg(fd, data, datalen);
 	return 0;
 }
 

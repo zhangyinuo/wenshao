@@ -74,7 +74,7 @@ int createsocket(char *ip, int port)
 	int					sockfd;
 	struct sockaddr_in	servaddr;
 
-	struct timeval timeo = {0, 500000};
+	struct timeval timeo = {5, 0};
 	socklen_t len = sizeof(timeo);
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0)

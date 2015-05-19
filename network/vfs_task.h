@@ -43,6 +43,7 @@ extern const char *over_status[OVER_LAST];
 typedef struct {
 	char dstip[16];
 	char domain[128];
+	int port;
 }t_task_base;
 
 typedef struct {

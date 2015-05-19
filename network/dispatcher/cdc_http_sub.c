@@ -103,7 +103,6 @@ static void create_task(char *domain, char ip[16][16])
 		snprintf(base->dstip, sizeof(base->dstip), "%s", ip[i]);
 		snprintf(base->domain, sizeof(base->domain), "%s", domain);
 
-		barrier();
 		vfs_set_task(task, g_queue_index);
 		LOG(vfs_http_log, LOG_NORMAL, "push task %s %s %d\n", base->domain, base->dstip, g_queue_index);
 		g_queue_index++;

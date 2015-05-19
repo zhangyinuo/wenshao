@@ -119,7 +119,7 @@ int init_thread(void) {
 	mainthread.pid = syscall(SYS_gettid);
 	mythreadid = 0;
 
-	maxid = 16;
+	maxid = 32;
 	threadlist = (struct thread**)malloc(maxid * sizeof(struct thread*));
 	if(threadlist == NULL) {
 		printf("init_thread: malloc threadlist fail, maxid=%d, %m\n", maxid);

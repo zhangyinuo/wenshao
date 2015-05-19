@@ -139,6 +139,17 @@ int main(int argc, char **argv) {
 			goto error;
 	}
 
+	for( ; i <= 16; i++)
+	{
+		arg = &(args[i]);
+		arg->queue = i;
+		snprintf(arg->name, sizeof(arg->name), "./getinfo.so");
+		LOG(glogfd, LOG_NORMAL, "prepare start %s\n", arg->name);
+		arg->maxevent = myconfig_get_intval("vfs_data_maxevent", 4096);
+		if (init_vfs_thread(arg))
+			goto error;
+	}
+
 	arg = &(args[i]);
 	snprintf(arg->name, sizeof(arg->name), "./dispatcher.so");
 	LOG(glogfd, LOG_NORMAL, "prepare start %s\n", arg->name);

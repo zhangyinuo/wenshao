@@ -171,25 +171,11 @@ static void do_scan(int fd, char *domain, int port, char *ip)
 	modify_fd_event(fd, EPOLLOUT);
 }
 
-static void gen_scan_task(char *ip, char *domain)
+static void gen_scan_task(char *ip, char *domain, int port)
 {
-	int i = 1;
-
-	LOG(vfs_sig_log, LOG_NORMAL, "%s %s %d %d\n", __FILE__, __func__, __LINE__, g_port_count);
-	for (; i < 255; i++)
-	{
-		char dstip[16] = {0x0};
-		snprintf(dstip, sizeof(dstip), "%s.%d", ip, i);
-
-		int j = 0;
-		for ( ; j < g_port_count; j++)
-		{
-	LOG(vfs_sig_log, LOG_NORMAL, "%s %s %d\n", __FILE__, __func__, __LINE__);
-			int fd = active_connect(dstip, g_port[j]);
-			if (fd > 0)
-				do_scan(fd, domain, g_port[j], dstip);
-		}
-	}
+	int fd = active_connect(ip, port);
+	if (fd > 0)
+		do_scan(fd, domain, port, ip);
 }
 
 static void check_task()
@@ -212,9 +198,8 @@ static void check_task()
 		}
 		once++;
 
-	LOG(vfs_sig_log, LOG_NORMAL, "%s %s %d\n", __FILE__, __func__, __LINE__);
 		t_task_base *base = (t_task_base *) (&(task->task.base));
-		gen_scan_task(base->dstip, base->domain);
+		gen_scan_task(base->dstip, base->domain, base->port);
 		vfs_set_task(task, TASK_HOME);
 	}
 }
