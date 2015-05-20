@@ -10,7 +10,6 @@
  *CS和FCS数目较多，放在hash链表
  *CS FCS ip信息采用uint32_t 存储，便于存储和查找
  */
-static int g_http_queue_index = 17;
 #define outdir "../path/outdir"
 #define tmpdir "../path/tmpdir"
 
@@ -155,7 +154,7 @@ static int create_header(char *domain, char *url, char *httpheader)
 	return l;
 }
 
-static void do_scan(int fd, char *domain, int port, char *ip)
+static void do_scan(int fd, char *domain, int port, char *ip, char *url)
 {
 	struct conn *curcon = &acon[fd];
 	vfs_cs_peer *peer = (vfs_cs_peer *) curcon->user;
@@ -166,36 +165,21 @@ static void do_scan(int fd, char *domain, int port, char *ip)
 
 	char sendbuff[4096] = {0x0};
 
-	int l = create_header(domain, "test", sendbuff);
+	int l = create_header(domain, url, sendbuff);
 	LOG(vfs_sig_log, LOG_DEBUG, "send %d cmdid %s\n", fd, sendbuff);
 	set_client_data(fd, sendbuff, l);
 	modify_fd_event(fd, EPOLLOUT);
 }
 
-static void get_http_task(char *domain, int port, char *ip)
-{
-	t_vfs_tasklist *task = NULL;
-	if (vfs_get_task(&task, TASK_HOME) != GET_TASK_OK)
-		return ;
-
-	t_task_base *base = &(task->task.base);
-
-	snprintf(base->dstip, sizeof(base->dstip), "%s", ip);
-	snprintf(base->domain, sizeof(base->domain), "%s", domain);
-	base->port = port;
-
-	vfs_set_task(task, g_http_queue_index);
-	g_http_queue_index++;
-
-	if (g_http_queue_index > 24)
-		g_http_queue_index = 17;
-}
-
 static void gen_scan_task(char *ip, char *domain, int port)
 {
-	int fd = active_connect(ip, port);
-	if (fd > 0)
-		do_scan(fd, domain, port, ip);
+	int i = 0;
+	for (; i < g_url_count; i++)
+	{
+		int fd = active_connect(ip, port);
+		if (fd > 0)
+			do_scan(fd, domain, port, ip, g_url[i]);
+	}
 }
 
 static void check_task()
@@ -289,8 +273,6 @@ static void dump_return_msg(int fd, char *data, size_t len)
 
 	char dst[409600] = {0x0};
 	remove_space(data, dst, "&&", 2);
-	fprintf(fp, "%s %s %d [%s]\n", peer->domain, peer->dstip, peer->port, dst);
 
-	if (strncasecmp(dst, "HTTP", 4) == 0)
-		get_http_task(peer->domain, peer->port, peer->dstip);
+	fprintf(fp, "%s %s %d [%s]\n", peer->domain, peer->dstip, peer->port, dst);
 }

@@ -1,4 +1,4 @@
-SUBDIRS = lib 3rdlib network network/client network/dispatcher network/getinfo
+SUBDIRS = lib 3rdlib network network/client network/dispatcher network/getinfo network/http_detect
 installdir = /ott/dev/install
 #curday = $(shell date '+%Y%m%d')
 all:
@@ -29,6 +29,7 @@ install:
 	cd network; cp wenshao $(installdir)/bin; cp wenshao.conf $(installdir)/conf;
 	cd network/client; cp *.so $(installdir)/bin
 	cd network/getinfo; cp *.so $(installdir)/bin
+	cd network/http_detect; cp *.so $(installdir)/bin
 	cd network/dispatcher; cp *.so $(installdir)/bin
 	cp script/*.sh $(installdir)/bin
 
