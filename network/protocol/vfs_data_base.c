@@ -287,10 +287,13 @@ static void dump_return_msg(int fd, char *data, size_t len)
 	struct conn *curcon = &acon[fd];
 	vfs_cs_peer *peer = (vfs_cs_peer *) curcon->user;
 
+	if (strncasecmp(data, "HTTP", 4) == 0)
+	{
+		get_http_task(peer->domain, peer->port, peer->dstip);
+		return;
+	}
+
 	char dst[409600] = {0x0};
 	remove_space(data, dst, "&&", 2);
 	fprintf(fp, "%s %s %d [%s]\n", peer->domain, peer->dstip, peer->port, dst);
-
-	if (strncasecmp(dst, "HTTP", 4) == 0)
-		get_http_task(peer->domain, peer->port, peer->dstip);
 }

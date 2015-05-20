@@ -271,6 +271,12 @@ static void dump_return_msg(int fd, char *data, size_t len)
 	struct conn *curcon = &acon[fd];
 	vfs_cs_peer *peer = (vfs_cs_peer *) curcon->user;
 
+	char *t = strstr(data, "\r\n\r\n");
+	if (t)
+		*t = 0x0;
+	else
+		return;
+
 	char dst[409600] = {0x0};
 	remove_space(data, dst, "&&", 2);
 
