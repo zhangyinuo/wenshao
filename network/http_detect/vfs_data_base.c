@@ -161,6 +161,7 @@ static void do_scan(int fd, char *domain, int port, char *ip, char *url)
 
 	snprintf(peer->domain, sizeof(peer->domain), "%s", domain);
 	snprintf(peer->dstip, sizeof(peer->dstip), "%s", ip);
+	snprintf(peer->url, sizeof(peer->url), "%s", url);
 	peer->port = port;
 
 	char sendbuff[4096] = {0x0};
@@ -280,5 +281,5 @@ static void dump_return_msg(int fd, char *data, size_t len)
 	char dst[409600] = {0x0};
 	remove_space(data, dst, "&&", 2);
 
-	fprintf(fp, "%s %s %d [%s]\n", peer->domain, peer->dstip, peer->port, dst);
+	fprintf(fp, "%s %s %d [%s] [%s]\n", peer->domain, peer->dstip, peer->port, peer->url, dst);
 }

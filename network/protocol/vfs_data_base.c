@@ -244,6 +244,15 @@ static void remove_space(char *src, char *dst, char *space, int len)
 
 static void dump_return_msg(int fd, char *data, size_t len)
 {
+	struct conn *curcon = &acon[fd];
+	vfs_cs_peer *peer = (vfs_cs_peer *) curcon->user;
+
+	if (strncasecmp(data, "HTTP", 4) == 0)
+	{
+		get_http_task(peer->domain, peer->port, peer->dstip);
+		return;
+	}
+
 	static FILE *fp = NULL;
 	static time_t last = 0;
 	if (last == 0)
@@ -282,15 +291,6 @@ static void dump_return_msg(int fd, char *data, size_t len)
 			LOG(vfs_sig_log, LOG_ERROR, "open %s error %m\n", tmpfile);
 			return;
 		}
-	}
-
-	struct conn *curcon = &acon[fd];
-	vfs_cs_peer *peer = (vfs_cs_peer *) curcon->user;
-
-	if (strncasecmp(data, "HTTP", 4) == 0)
-	{
-		get_http_task(peer->domain, peer->port, peer->dstip);
-		return;
 	}
 
 	char dst[409600] = {0x0};

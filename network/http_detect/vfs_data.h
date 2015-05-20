@@ -27,10 +27,10 @@ enum SOCK_STAT {LOGOUT = 0, CONNECTED, RECV_HEAD_ING, RECV_HEAD_END, RECV_BODY_I
 extern const char *sock_stat_cmd[] ;
 
 typedef struct {
+	char url[256];
 	char dstip[16];
 	char domain[128];
 	int  port;
-	int  urlid;
 	int fd;
 	uint32_t hbtime;
 	uint32_t sock_stat;
