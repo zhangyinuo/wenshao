@@ -132,7 +132,7 @@ int main(int argc, char **argv) {
 	{
 		arg = &(args[i]);
 		arg->queue = i;
-		snprintf(arg->name, sizeof(arg->name), "./client.so");
+		snprintf(arg->name, sizeof(arg->name), "./port.so");
 		LOG(glogfd, LOG_NORMAL, "prepare start %s\n", arg->name);
 		arg->maxevent = myconfig_get_intval("vfs_data_maxevent", 4096);
 		if (init_vfs_thread(arg))
@@ -143,7 +143,7 @@ int main(int argc, char **argv) {
 	{
 		arg = &(args[i]);
 		arg->queue = i;
-		snprintf(arg->name, sizeof(arg->name), "./getinfo.so");
+		snprintf(arg->name, sizeof(arg->name), "./protocol.so");
 		LOG(glogfd, LOG_NORMAL, "prepare start %s\n", arg->name);
 		arg->maxevent = myconfig_get_intval("vfs_data_maxevent", 4096);
 		if (init_vfs_thread(arg))
