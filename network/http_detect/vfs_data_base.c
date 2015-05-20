@@ -259,7 +259,7 @@ static void dump_return_msg(int fd, char *data, size_t len)
 		char buft[16] = {0x0};
 		memset(tmpfile, 0, sizeof(tmpfile));
 		get_strtime(buft);
-		snprintf(tmpfile, sizeof(tmpfile), "%s/first_%s_%ld", tmpdir, buft, syscall(SYS_gettid));
+		snprintf(tmpfile, sizeof(tmpfile), "%s/http_%s_%ld", tmpdir, buft, syscall(SYS_gettid));
 		fp = fopen(tmpfile, "w");
 		if (fp == NULL)
 		{
