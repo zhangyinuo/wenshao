@@ -1,4 +1,4 @@
-SUBDIRS = lib 3rdlib network network/port network/dispatcher network/protocol network/http_detect
+SUBDIRS = lib 3rdlib network network/port network/dispatcher network/protocol network/http_detect da/src
 installdir = /ott/dev/install
 #curday = $(shell date '+%Y%m%d')
 all:

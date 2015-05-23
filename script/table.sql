@@ -22,3 +22,22 @@ create table t_sub(
 	primary key (id)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+create table t_msg (
+	domain	varchar(256)  not null;
+	ip      varchar(16)   not null;
+	port    int           not null;
+	msg     varchar(2048) not null;
+	primary key(domain, ip, port)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+
+create table t_http_msg (
+	domain	varchar(256)  not null;
+	ip      varchar(16)   not null;
+	port    int           not null;
+	url     varchar(256)  not null;
+	msg     varchar(2048) not null;
+	retcode int           not null;
+	primary key(domain, ip, port, url)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+

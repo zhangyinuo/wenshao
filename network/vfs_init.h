@@ -110,6 +110,19 @@ typedef struct {
 	uint8_t role;
 } t_g_config;
 
+typedef struct {
+	char url[256];
+	char dstip[16];
+	char domain[128];
+	int  port;
+	int fd;
+	uint32_t hbtime;
+	uint32_t sock_stat;
+	list_head_t alist;
+} t_peer_info;
+
+typedef t_peer_info vfs_cs_peer; 
+
 extern t_g_config g_config;
 
 int vfs_init();
