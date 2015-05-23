@@ -26,31 +26,9 @@ int cdc_db_log = -1;
 int process_curday = 1;
 #include "cdc_db_sub.c"
 
-void EnterDaemonMode(void)
-{
-	switch(fork())
-	{
-		case 0:
-
-			break;
-
-		case -1:
-
-			fprintf(stderr, "fork error %m\n");
-			exit(-1);
-			break;
-
-		default:
-
-			exit(0);
-			break;
-	}
-
-	setsid();
-}
-
 int init_para(t_path_info * path)
 {
+	fprintf(stderr, "%s %d\n", __func__, __LINE__);
 	char *v = myconfig_get_value("log_logname");
 	if (v == NULL)
 	{
@@ -63,11 +41,14 @@ int init_para(t_path_info * path)
 	int logtime = myconfig_get_intval("log_logtime", 3600);
 	int logcount = myconfig_get_intval("log_logcount", 10);
 
+	fprintf(stderr, "%s %d\n", __func__, __LINE__);
 	if (init_log())
 	{
 		fprintf(stderr, "init log error %m\n");
 		return -1;
 	}
+
+	fprintf(stderr, "%s %d\n", __func__, __LINE__);
 
 	cdc_db_log = registerlog(logfile, loglevel, logsize, logtime, logcount);
 	if (cdc_db_log < 0)
@@ -84,21 +65,7 @@ int init_para(t_path_info * path)
 	}
 	snprintf(path->indir, sizeof(path->indir), "%s", v);
 
-	v = myconfig_get_value("path_bkdir");
-	if (v == NULL)
-	{
-		LOG(cdc_db_log, LOG_ERROR, "config have not path_bkdir!\n");
-		return -1;
-	}
-	snprintf(path->bkdir, sizeof(path->bkdir), "%s", v);
-
-	redisdir = myconfig_get_value("path_cdc_redis");
-	if (redisdir == NULL)
-	{
-		LOG(cdc_db_log, LOG_ERROR, "config have not path_cdc_redis!\n");
-		return -1;
-	}
-	process_curday = myconfig_get_intval("process_curday", 1);
+	fprintf(stderr, "%s %d\n", __func__, __LINE__);
 	return init_db();
 }
 
@@ -112,7 +79,7 @@ int main(int argc, char **argv)
 			return -1;
 		}
 	}
-	EnterDaemonMode();
+	daemon(1, 1);
 	if (myconfig_init(argc, argv))
 	{
 		fprintf(stderr, "myconfig_init error [%s]\n", strerror(errno));
@@ -124,19 +91,9 @@ int main(int argc, char **argv)
 	if (init_para(&cdc_path))
 		return -1;
 
-	time_t cur = time(NULL);
-	time_t last = 0;
-	int merge_time = myconfig_get_intval("db_merge", 3600);
-
 	while (1)
 	{
 		do_refresh_run_task();
-		cur = time(NULL);
-		if (cur - last >= merge_time)
-		{
-			last = cur;
-			merge_db(cur - merge_time);
-		}
 		sleep (5);
 	}
 }

@@ -23,6 +23,7 @@ static int connect_db(t_db_info *db)
 		LOG(cdc_db_log, LOG_ERROR, "mysql_real_connect err %m\n");
 		return -1;
 	}
+	fprintf(stderr, "%s %d\n", __func__, __LINE__);
 	return 0;
 }
 
@@ -63,6 +64,7 @@ int init_db()
 	snprintf(db.db, sizeof(db.db), "%s", v);
 
 	db.port = myconfig_get_intval("db_port", 3306);
+	fprintf(stderr, "%s %d\n", __func__, __LINE__);
 	return connect_db(&db);
 }
 
