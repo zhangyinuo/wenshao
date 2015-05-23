@@ -8,7 +8,7 @@
 #include <stdint.h>
 #include <dirent.h>
 #include <string.h>
-enum ROLE {UNKOWN = 0, ROLE_FCS , ROLE_CS, ROLE_TRACKER, ROLE_VOSS_MASTER, ROLE_HOT_CS, SELF_IP, ROLE_MAX};
+enum ROLE {ROLE_FIRST =0 , ROLE_HTTP};
 
 typedef struct {
 	char ip[16];
