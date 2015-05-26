@@ -11,31 +11,26 @@
 enum ROLE {ROLE_FIRST =0 , ROLE_HTTP};
 
 typedef struct {
-	char ip[16];
 	char domain[16];
-	char fname[256];
-	char task_type[2];
-	char task_stime[16];
-}t_voss_key;
-
-typedef struct {
-	uint64_t fsize;
-	char fmd5[34];
-	char over_status[16];
-	char task_ctime[16];
-	char role[2];
-}t_voss_val;
-
-typedef struct {
 	char ip[16];
-	char day[10];
-}t_voss_s_key;
+	int  port;
+}t_first_key;
 
 typedef struct {
-	int total;
-	int success;
-	int fail;
-}t_voss_s_val;
+	char msg[2048];
+}t_first_val;
+
+typedef struct {
+	char domain[16];
+	char ip[16];
+	char url[256];
+	int  port;
+}t_http_key;
+
+typedef struct {
+	char msg[2048];
+	int  retcode;
+}t_http_val;
 
 #ifdef __cplusplus
 extern "C"
@@ -52,7 +47,9 @@ int mydb_begin();
 
 int mydb_commit();
 
-int mydb_get_voss(t_voss_key *k, t_voss_val *v);
+int mydb_get_first(t_first_key *k, t_first_val *v);
+
+int mydb_get_http(t_http_key *k, t_http_val *v);
 
 void merge_db(time_t last);
 
